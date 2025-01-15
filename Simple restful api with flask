@@ -1,0 +1,133 @@
+Building a simple REST API in Python can be done using several frameworks, but one of the most popular and lightweight options is Flask. Below are the steps to build a basic REST API using Flask.
+
+Step 1: Install Flask
+You need to install Flask if you don't have it installed yet. You can install it via pip:
+
+bash
+Copy code
+pip install Flask
+
+Step 2: Set Up the Project Structure
+
+Create a new directory for your project and inside it, create a Python file (e.g., app.py).
+
+bash
+Copy code
+mkdir simple_rest_api
+cd simple_rest_api
+touch app.py
+
+Step 3: Create Your Simple Flask Application
+
+In your app.py file, write the following code to create a simple REST API:
+
+python
+Copy code
+from flask import Flask, jsonify, request
+
+app = Flask(__name__)
+
+# Sample data to simulate a database
+todos = [
+    {"id": 1, "task": "Do the dishes", "done": False},
+    {"id": 2, "task": "Buy groceries", "done": False},
+    {"id": 3, "task": "Walk the dog", "done": True}
+]
+
+# Home route
+@app.route('/')
+def home():
+    return "Welcome to the Simple REST API!"
+
+# GET all Todos
+@app.route('/todos', methods=['GET'])
+def get_todos():
+    return jsonify(todos)
+
+# GET single Todo by ID
+@app.route('/todos/<int:id>', methods=['GET'])
+def get_todo_by_id(id):
+    todo = next((todo for todo in todos if todo["id"] == id), None)
+    if todo is None:
+        return jsonify({"message": "Todo not found!"}), 404
+    return jsonify(todo)
+
+# POST a new Todo
+@app.route('/todos', methods=['POST'])
+def create_todo():
+    data = request.get_json()
+    new_todo = {
+        "id": len(todos) + 1,
+        "task": data.get("task"),
+        "done": data.get("done", False)
+    }
+    todos.append(new_todo)
+    return jsonify(new_todo), 201
+
+# PUT (update) an existing Todo
+@app.route('/todos/<int:id>', methods=['PUT'])
+def update_todo(id):
+    data = request.get_json()
+    todo = next((todo for todo in todos if todo["id"] == id), None)
+    if todo is None:
+        return jsonify({"message": "Todo not found!"}), 404
+
+    todo["task"] = data.get("task", todo["task"])
+    todo["done"] = data.get("done", todo["done"])
+
+    return jsonify(todo)
+
+# DELETE a Todo
+@app.route('/todos/<int:id>', methods=['DELETE'])
+def delete_todo(id):
+    global todos
+    todos = [todo for todo in todos if todo["id"] != id]
+    return jsonify({"message": "Todo deleted!"}), 200
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+Step 4: Running the API
+
+In your terminal, run the following command to start the Flask development server:
+
+bash
+Copy code
+python app.py
+This will start the API server locally at http://127.0.0.1:5000/. You can now interact with your API using a tool like Postman, curl, or your browser.
+
+Example API Endpoints:
+GET /todos: Retrieve all the todo items.
+
+bash
+Copy code
+curl http://127.0.0.1:5000/todos
+GET /todos/<id>: Retrieve a specific todo by ID.
+
+bash
+Copy code
+curl http://127.0.0.1:5000/todos/1
+POST /todos: Create a new todo item.
+
+bash
+Copy code
+curl -X POST -H "Content-Type: application/json" -d '{"task": "Learn Python", "done": false}' http://127.0.0.1:5000/todos
+PUT /todos/<id>: Update an existing todo.
+
+bash
+Copy code
+curl -X PUT -H "Content-Type: application/json" -d '{"task": "Learn Python 3", "done": true}' http://127.0.0.1:5000/todos/1
+DELETE /todos/<id>: Delete a todo.
+
+bash
+Copy code
+curl -X DELETE http://127.0.0.1:5000/todos/1
+Step 5: Testing and Improving
+Now that you have the basic functionality set up, you can:
+
+Add validation for incoming data.
+Improve error handling (e.g., for invalid requests).
+Integrate a real database (e.g., SQLite, PostgreSQL) instead of using in-memory data.
+Add authentication (e.g., via JWT tokens).
+Deploy the API to a platform like Heroku or AWS.
+This is a simple start, and you can expand it further based on your requirements!
